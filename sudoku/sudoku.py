@@ -119,9 +119,42 @@ class GameStatus:
                 tmp_cell = Cell(str(c) + str(r))
                 index = self.cells.index(tmp_cell)
                 cell = self.cells[index]
-                s = s + str(cell.num) if cell.num else "."
+                s = s + (str(cell.num) if cell.num else ".")
             lst.append(s)
         return lst
+
+    def validate(self):
+        return "" + \
+               ("r" if not self._validate_rows() else "") + \
+               ("c" if not self._validate_cols() else "") + \
+               ("s" if not self._validate_squares() else "")
+
+    def _validate_rows(self):
+        return self._validate_entity(list(range(1,10)),"row")
+
+    def _validate_cols(self):
+        return self._validate_entity(["a","b","c","d","e","f","g","h","i"],"col")
+
+    def _validate_squares(self):
+        return self._validate_entity(list(range(1,10)),"square")
+
+    def _validate_entity(self,list,prop_name):
+        for item in list:
+            cells = [c for c in self.cells if getattr(c,prop_name) == item]
+            ok = self._validate_group_cells(cells)
+            if not ok:
+                return False
+        return True
+        
+    def _validate_group_cells(self,cells):
+        d = {n:0 for n in range(1,10)}
+        d[None]=0
+        for k,v in d.items():
+            count = len([c for c in cells if c.num == k])
+            if count > 1 and k != None:
+                return False
+        return True
+        
 
 class NumberSearchEngine:
     def __init__(self,game_status):
@@ -236,9 +269,11 @@ if __name__ == "__main__":
     game_inp = get_game_inp()
     gs = GameStatus(game_inp)
     gs.print()
-    lst=gs.compressed()
-    for r in lst:
-        print(r + "\n")
+    ok = gs.validate()
+    print("ok?" + str(ok))
+    #lst=gs.compressed()
+    #for r in lst:
+    #    print(r + "\n")
     
     #engine = NumberSearchEngine(gs)
     #engine.find_numbers()

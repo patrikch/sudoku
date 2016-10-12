@@ -3,6 +3,7 @@ class Node:
         self.ident = ident
         self.label = label
         self.children = []
+        self.done = False
 
     def __repr__(self):
         return "Node({0}, {1})".format(self.ident,self.label)
