@@ -37,14 +37,20 @@ class Tree:
 
     def find_nodes_by_filter(self,filter):
         selected = []
-        for n in self.nodes:
+        self._find_last_done_in_nodes(filter,n.children,selected)
+        
+
+    def get_node_depth(self,node):
+        depth = 0
+        children = self.nodes
+        while children != None
+
+    def _find_last_done_in_nodes(self,filter,nodes,selected):
+        for n in nodes:
             if filter in str(n):
                 selected.append(n)
-            tmp = 
-
-    def _find_last_done_in_nodes(self,filter,nodes):
-        pass
-            
+            if n.children:
+                self._find_last_done_in_nodes(filter,n.children,selected)    
             
     def print(self):
         for n in self.nodes:
