@@ -167,10 +167,10 @@ class NumberSearchEngine:
         self.tree = Tree()
         while self.game_status.empty_count > 0:
             found_cells = self._find_empty_cells_with_smallest_choice()
-            self.add_to_tree(found_cells,prev)
             if len(found_cells) > 0:
                 c = found_cells[0]
                 c.cell.num = c.choices[0]
+                self.add_to_tree(found_cells,c.cell.id + "=" + str(c.cell.num),prev)
                 prev = c.cell.id + str(c.cell.num)
                 self.print_progress(found_cells)
             else:
@@ -182,10 +182,13 @@ class NumberSearchEngine:
                 break
     
             
-    def add_to_tree(self,found_cells,parent_id=None):
+    def add_to_tree(self,found_cells,selected,parent_id=None):
         for fcell in found_cells:
             for choice in fcell.choices:
-                node = Node(fcell.cell.id + str(choice),fcell.cell.id + "=" + str(choice))
+                label = fcell.cell.id + "=" + str(choice)
+                node = Node(fcell.cell.id + str(choice),label)
+                if label == selected:
+                    node.done = True
                 self.tree.add_node(node,parent_id)
         
 
@@ -269,15 +272,15 @@ if __name__ == "__main__":
     game_inp = get_game_inp()
     gs = GameStatus(game_inp)
     gs.print()
-    ok = gs.validate()
-    print("ok?" + str(ok))
+    #ok = gs.validate()
+    #print("ok?" + str(ok))
     #lst=gs.compressed()
     #for r in lst:
     #    print(r + "\n")
     
-    #engine = NumberSearchEngine(gs)
-    #engine.find_numbers()
-    #engine.tree.print()
+    engine = NumberSearchEngine(gs)
+    engine.find_numbers()
+    engine.tree.print()
     #------------------------------
     #gs.print_statistics()
     #gs.print()

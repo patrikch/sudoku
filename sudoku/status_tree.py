@@ -6,7 +6,7 @@ class Node:
         self.done = False
 
     def __repr__(self):
-        return "Node({0}, {1})".format(self.ident,self.label)
+        return "Node({0}, {1})".format(self.label,str(self.done))
 
 class Tree:
     def __init__(self):
@@ -34,12 +34,23 @@ class Tree:
                 return found
 
         return None
+
+    def find_nodes_by_filter(self,filter):
+        selected = []
+        for n in self.nodes:
+            if filter in str(n):
+                selected.append(n)
+            tmp = 
+
+    def _find_last_done_in_nodes(self,filter,nodes):
+        pass
+            
             
     def print(self):
         for n in self.nodes:
             self.print_node(n,"  ")
 
     def print_node(self,n,odsazeni):
-        print(odsazeni + " - " + str(n.ident))
+        print(odsazeni + " - " + str(n))
         for ch in n.children:
             self.print_node(ch,odsazeni + "  ")
