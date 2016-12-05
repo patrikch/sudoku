@@ -15,7 +15,7 @@ class Node:
 
     def __repr__(self):
         """object representation"""
-        return "Node(label={0},done={1})".format(self.label, str(self.done))
+        return "Node(label={0},done={1},id={2})".format(self.label, str(self.done), str(self.ident))
 
 
 class Tree:
@@ -25,7 +25,7 @@ class Tree:
         """initialization - create empty list of nodes"""
         self.nodes = []
 
-    def add_node(self, node, parent_id = None):
+    def add_node(self, node, parent_id=None):
         """ find parent node and add new child to this parent node """
         if not parent_id:
             self.nodes.append(node)
@@ -57,17 +57,22 @@ class Tree:
         """
         try to find nearest node which is done=False to node in parameter
         """
-        nodes = [node.parent.children if node.parent else self.nodes]
+        nodes = node.parent.children if node.parent else self.nodes
+        print(str(nodes))
         brothers = [brother for brother in nodes
-                        if brother.ident != node_id and not brother.done]
+                    if brother.ident != node_id and not brother.done]
         found = brothers[0] if len(brothers) > 0 else None
-        if not found and not node.parent:
-            return self.find_nearest_free_node(node.parent, node_id)
+        if not found and node.parent:
+            found = self.find_nearest_free_node(node.parent, node_id)
+            # print(str(node_id) + " - " + str(found))
+            return found
+        # print(str(node_id) + " - " + str(found))
         return found
 
 
-def create_node(id, label, done = False):
-    node = Node(id, label)
+def create_node(ident, label, done=False):
+    """ create node object from parameters """
+    node = Node(ident, label)
     node.done = done
     return node
 
@@ -78,8 +83,12 @@ if __name__ == "__main__":
     tree.add_node(create_node(2, "B1", False))
     tree.add_node(create_node(3, "A11", True), 1)
     tree.add_node(create_node(4, "A12", True), 1)
-    tree.add_node(create_node(5, "A111", True), 3)
+    tree.add_node(create_node(5, "A111", False), 3)
     tree.add_node(create_node(6, "A112", False), 3)
     tree.add_node(create_node(7, "A121", True), 4)
-    tree.add_node(create_node(8, "A122", False), 4)
+    tree.add_node(create_node(8, "A122", True), 4)
     tree.add_node(create_node(9, "A1211", True), 7)
+    n = create_node(10, "A1212", False)
+    tree.add_node(n, 7)
+    nearest = tree.find_nearest_free_node(n, n.ident)
+    print(str(nearest))
