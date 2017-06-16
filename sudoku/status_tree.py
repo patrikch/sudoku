@@ -9,15 +9,16 @@ class Node:
     def __repr__(self):
         return "Node({0}, done={1})".format(self.label,str(self.done))
 
+
 class Tree:
     def __init__(self):
         self.nodes = []
 
-    def add_node(self,node,parent_id=None):
+    def add_node(self, node, parent_id=None):
         if not parent_id:
             self.nodes.append(node)
         else:
-            parent = self.find_in_nodes(self.nodes,parent_id)
+            parent = self.find_in_nodes(self.nodes, parent_id)
                 
             if parent:
                 node.level = parent.level + 1
@@ -25,13 +26,13 @@ class Tree:
             else:
                 raise ValueError("Node not found (" + str(parent_id) + ")")
 
-    def find_in_nodes(self,nodes,wanted_id):
+    def find_in_nodes(self, nodes, wanted_id):
         if len(nodes) == 0:
             return None
         for n in nodes:
             if n.ident == wanted_id:
                 return n
-            found = self.find_in_nodes(n.children,wanted_id)
+            found = self.find_in_nodes(n.children, wanted_id)
             if found:
                 return found
 

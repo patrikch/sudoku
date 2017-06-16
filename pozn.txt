@@ -1,0 +1,3 @@
+testy spoustet z Projects/sudoku/
+prikazem:
+python3 -m unittest sudoku/tests.py

@@ -4,18 +4,24 @@
 class Node:
     """ Represent one node in tree """
 
-    def __init__(self, ident, label):
+    def __init__(self, ident, label='', done=False):
         """initialization with ident and label fields"""
         self.ident = ident
         self.label = label
-        self.done = False
+        self.done = done
         self.children = []
-        self.data = ""
+        self.data = ''
         self.parent = None
 
     def __repr__(self):
         """object representation"""
-        return "Node(label={0},done={1},id={2})".format(self.label, str(self.done), str(self.ident))
+        return 'Node(label={0},done={1},id={2})'.format(self.label, str(self.done), str(self.ident))
+
+    def __eq__(self, other):
+        return self.ident == other.ident
+
+    def __hash__(self):
+        return hash(self.ident)
 
 
 class Tree:
@@ -24,6 +30,9 @@ class Tree:
     def __init__(self):
         """initialization - create empty list of nodes"""
         self.nodes = []
+
+    def __len__(self):
+        return len(self.nodes)
 
     def add_node(self, node, parent_id=None):
         """ find parent node and add new child to this parent node """
@@ -35,7 +44,14 @@ class Tree:
                 node.parent = parent
                 parent.children.append(node)
             else:
-                raise ValueError("Node not found (" + str(parent_id) + ")")
+                raise ValueError('Node not found ({})'.format(str(parent_id)))
+
+    def exists_node(self, node, parent_id):
+        parent = self.find_in_nodes(self.nodes, parent_id)
+        if not parent:
+            return False
+        found_node = self.find_in_nodes(parent.children, node.ident)
+        return found_node
 
     def find_in_nodes(self, nodes, wanted_id):
         """
@@ -53,42 +69,43 @@ class Tree:
 
         return None
 
-    def find_nearest_free_node(self, node, node_id):
+    def find_nearest_not_done_node(self, node, start_node_id):
         """
         try to find nearest node which is done=False to node in parameter
         """
         nodes = node.parent.children if node.parent else self.nodes
-        print(str(nodes))
+        # print(str(nodes))
         brothers = [brother for brother in nodes
-                    if brother.ident != node_id and not brother.done]
+                    if brother.ident != start_node_id and not brother.done]
         found = brothers[0] if len(brothers) > 0 else None
         if not found and node.parent:
-            found = self.find_nearest_free_node(node.parent, node_id)
-            # print(str(node_id) + " - " + str(found))
-            return found
-        # print(str(node_id) + " - " + str(found))
+            return self.find_nearest_not_done_node(node.parent, start_node_id)
         return found
+    
+    def print(self):
+        for node in self.nodes:
+            self.print_node(node)
 
-
-def create_node(ident, label, done=False):
-    """ create node object from parameters """
-    node = Node(ident, label)
-    node.done = done
-    return node
+    def print_node(self, node, indent=1):
+        s = '  '
+        print(s * indent + str(node))
+        for child in node.children:
+            self.print_node(child, indent+1)
 
 
 if __name__ == "__main__":
     tree = Tree()
-    tree.add_node(create_node(1, "A1", True))
-    tree.add_node(create_node(2, "B1", False))
-    tree.add_node(create_node(3, "A11", True), 1)
-    tree.add_node(create_node(4, "A12", True), 1)
-    tree.add_node(create_node(5, "A111", False), 3)
-    tree.add_node(create_node(6, "A112", False), 3)
-    tree.add_node(create_node(7, "A121", True), 4)
-    tree.add_node(create_node(8, "A122", True), 4)
-    tree.add_node(create_node(9, "A1211", True), 7)
-    n = create_node(10, "A1212", False)
+    tree.add_node(Node(1, "A1", True))
+    tree.add_node(Node(2, "B1", False))
+    tree.add_node(Node(3, "A11", True), 1)
+    tree.add_node(Node(4, "A12", True), 1)
+    tree.add_node(Node(5, "A111", False), 3)
+    tree.add_node(Node(6, "A112", False), 3)
+    tree.add_node(Node(7, "A121", True), 4)
+    tree.add_node(Node(8, "A122", True), 4)
+    tree.add_node(Node(9, "A1211", True), 7)
+    n = Node(10, "A1212", False)
     tree.add_node(n, 7)
-    nearest = tree.find_nearest_free_node(n, n.ident)
-    print(str(nearest))
+    tree.print()
+    #nearest = tree.find_nearest_free_node(n, n.ident)
+    #print(str(nearest))
