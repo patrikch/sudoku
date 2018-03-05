@@ -1,5 +1,5 @@
-from status_tree import Tree, Node
-from structures import Game, Cell
+from sudoku.status_tree import Tree, Node
+from sudoku.structures import Game, Cell
 
 
 class NumberSearchEngine:
@@ -8,10 +8,8 @@ class NumberSearchEngine:
         self.game_archive = []
         self.game = game
         self.tree = Tree()
-        self.prev_node_name = None
 
     def find_numbers(self, if_fail_create_new_plan=True):
-        self.prev_node_name = None
         self.tree = Tree()
         while self.game.empty_count > 0:
             ok = self.make_step(if_fail_create_new_plan)
@@ -21,13 +19,14 @@ class NumberSearchEngine:
         return True
 
     def save_game_current_status(self):
-        if self.prev_node_name:
-            prev_node = self.tree.find_in_nodes(self.tree.nodes, self.prev_node_name)
-            if not prev_node.data:
-                prev_node.data = self.game.get_formatted_solution_cells()
+        current = self.tree.get_current()
+        if current:
+            if not current.data:
+                current.data = self.game.get_formatted_solution_cells()
 
     def find_next_number(self):
         try:
+            #print(self.game.get_formatted_solution_cells() + '\n')
             found_cells = self._find_empty_cells_with_smallest_choice()
         except EmptyCellsWithNoChoicesException:
             return False
@@ -35,9 +34,11 @@ class NumberSearchEngine:
         if len(found_cells) > 0:
             c = found_cells[0]
             c.cell.num = c.choices[0]
-            self.add_to_tree(found_cells, c.cell.id + "=" + str(c.cell.num), self.prev_node_name)
-            self.prev_node_name = c.cell.id + '=' + str(c.cell.num)
-            # self.print_progress(found_cells)
+            current_node = self.tree.get_current()
+            new_current_node_id = c.cell.id + "=" + str(c.cell.num)
+            self.add_to_tree(found_cells, new_current_node_id, current_node.id if current_node else None)
+            self.tree.set_current(new_current_node_id)
+            print('new current node:{}'.format(self.tree.get_current()))
             return True
         else:
             return False
@@ -46,29 +47,30 @@ class NumberSearchEngine:
         self.save_game_current_status()
         ok = self.find_next_number()
         if ok:
-            try:
-                self.game.add_cell(Cell(self.prev_node_name[:2], int(self.prev_node_name[3])))
-            except IndexError:
-                pass
-                #print('[' + self.prev_node_name + ']')
+            current_node = self.tree.get_current()
+            self.game.add_cell(Cell(current_node.id[:2], int(current_node.id[3])))
         else:
-            print('chybi:' + str(self.game.empty_count))
+            print('chybi:' + str(self.game.empty_count) + '\n')
+            print('game:' + self.game.get_formatted_solution_cells())
             self.game_archive.append(self.game)
             if if_fail_create_new_plan:
                 self.create_new_game_plan_to_continue()
         return ok
 
     def create_new_game_plan_to_continue(self):
-        prev_node = self.tree.find_in_nodes(self.tree.nodes, self.prev_node_name)
-        #print('find nearest:{}'.format(str(prev_node)))
-        node_to_continue = self.tree.find_nearest_not_done_node(prev_node, self.prev_node_name)
-        #print('found nearest:{}'.format(str(node_to_continue)))
+        current_node = self.tree.get_current()
+        current_node.done = True
+        print('find nearest for:{}'.format(current_node) + ',done=' + str(current_node.done) + '\n')
+        node_to_continue = self.tree.find_nearest_not_done_node(current_node, current_node.id)
+        self.print_tree()
         new_game = Game(self.game.get_input_cells())
-        #print('new data:' + node_to_continue.parent.data)
         new_game.reconstruct_saved_game(node_to_continue.parent.data)
-        #print('last cell after reconsruction:' + str(new_game.cells[len(new_game.cells)-1]))
         new_game.add_cell(Cell(node_to_continue.id[:2], int(node_to_continue.id[3])))
-        #print('last cell after add_cell:' + str(new_game.cells[len(new_game.cells) - 1]))
+        self.tree.set_current(node_to_continue.id)
+        node_to_continue = self.tree.get_current()
+        print('new current node:{}'.format(node_to_continue) + ',done=' + str(node_to_continue.done) + '\n')
+        #current_node = self.tree.get_current()
+        #print('new current node:{}'.format(current_node))
         self.game = new_game
 
     def add_to_tree(self, found_cells, selected, parent_id=None):
@@ -86,6 +88,10 @@ class NumberSearchEngine:
         for cell in found_cells:
             print("bunka=" + str(cell))
             print("----------------------")
+
+    def print_tree(self):
+        all_nodes = list(self.tree.walk_through_nodes_breadth_first(add_separators=True))
+        print(','.join(n.id for n in all_nodes) + '\n')
 
     def _find_empty_cells_with_smallest_choice(self):
         cell_choices = self._get_all_empty_cells_choices()

@@ -1,4 +1,4 @@
-from task_readers import GameFileReader
+from sudoku.task_readers import GameFileReader
 
 
 class Cell:
@@ -73,6 +73,12 @@ class Game:
 
         cell.solution_cell = True
         self.cells.append(cell)
+
+    def get_solution_cells(self):
+        return [cell for cell in self.cells if cell.solution_cell]
+
+    def get_last_cell(self):
+        return self.cells[len(self.cells)-1]
 
     def get_formatted_solution_cells(self):
         cells = [cell.id + '=' + str(cell.num) for cell in self.cells if cell.solution_cell]

@@ -32,7 +32,7 @@ class TextBlockReader:
         self.text_block = text_block
 
     def get_game(self):
-        from structures import Cell
+        from sudoku.structures import Cell
 
         tmp = self.text_block.split('\n')
         lines = [line.strip() for line in tmp if len(line.strip()) > 0]

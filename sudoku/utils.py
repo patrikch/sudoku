@@ -6,7 +6,7 @@ class GameFormatter:
         self.game = game
 
     def print(self):
-        from structures import Cell
+        from sudoku.structures import Cell
         cols = ["a", "b", "c", "d", "e", "f", "g", "h", "i"]  #a-i
         rows = [n for n in range(1, 10)]                      #1-9
         for r in rows:

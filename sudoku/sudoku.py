@@ -1,5 +1,5 @@
-from utils import GameFormatter
-from structures import Cell
+from sudoku.utils import GameFormatter
+from sudoku.structures import Cell
 
 
 class GameStatus:
